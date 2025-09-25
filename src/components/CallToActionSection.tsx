@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CallToActionSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 bg-gradient-to-r from-primary via-primary-glow to-primary relative overflow-hidden">
       {/* Animated background elements */}
@@ -32,6 +35,7 @@ const CallToActionSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
               size="lg" 
+              onClick={() => navigate('/upload-sheets')}
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-10 py-6 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
             >
               Start Trial
