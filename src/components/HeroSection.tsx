@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Shield, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-primary">
       {/* Animated background elements */}
@@ -41,6 +44,7 @@ const HeroSection = () => {
           <div className="animate-fade-up" style={{ animationDelay: '0.3s' }}>
             <Button 
               size="lg" 
+              onClick={() => navigate("/upload-sheets")}
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-8 py-6 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
             >
               Try for Free
