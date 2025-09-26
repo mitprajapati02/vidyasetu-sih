@@ -18,9 +18,64 @@ import {
   CreditCard,
   ArrowRight,
 } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+import { X } from "lucide-react";
+
+interface SampleFileFillerProps {
+  handleFileUpload: (file: File, type: "attendance" | "marks" | "fees") => void;
+}
+
+const SampleDataFiller: React.FC<SampleFileFillerProps> = ({
+  handleFileUpload,
+}) => {
+  const [visible, setVisible] = useState(true);
+
+  // Function to fetch sample files from public folder and send to handleFileUpload
+  const fillSampleFiles = async () => {
+    const sampleFiles = [
+      {
+        type: "attendance",
+        url: "/sample-attendance.xlsx",
+        name: "sample-attendance.xlsx",
+      },
+      { type: "marks", url: "/sample-marks.xlsx", name: "sample-marks.xlsx" },
+      { type: "fees", url: "/sample-fees.xlsx", name: "sample-fees.xlsx" },
+    ];
+
+    for (const fileInfo of sampleFiles) {
+      const res = await fetch(fileInfo.url);
+      const blob = await res.blob();
+      const file = new File([blob], fileInfo.name, { type: blob.type });
+      handleFileUpload(file, fileInfo.type as "attendance" | "marks" | "fees");
+    }
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed left-0 top-1/3 z-50 flex flex-col items-center bg-white shadow-lg rounded-r-xl p-4 space-y-4">
+      {/* Cancel icon */}
+      <button
+        onClick={() => setVisible(false)}
+        className="self-end text-gray-500 hover:text-red-500 transition"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      {/* Fill Sample Data Button */}
+      <button
+        onClick={fillSampleFiles}
+        className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition"
+      >
+        Fill Sample Data
+      </button>
+    </div>
+  );
+};
 
 const UploadSheets = () => {
   const [attendance, setAttendance] = useState<File | null>(null);
@@ -90,16 +145,28 @@ const UploadSheets = () => {
 
   const sampleFormats = {
     attendance: {
-      headers: ["StudentID", "Name", "Subject", "Attendance%", "TotalClasses"],
-      example: ["ST001", "John Doe", "Mathematics", "85", "20"],
+      headers: [
+        "roll_no",
+        "name",
+        "subject1_attendance",
+        "subject2_attendance",
+        "subject3_attendance",
+      ],
+      example: ["001", "John Doe", "40", "85", "20"],
     },
     marks: {
-      headers: ["StudentID", "Name", "Subject", "TestScore", "MaxMarks"],
-      example: ["ST001", "John Doe", "Mathematics", "78", "100"],
+      headers: [
+        "roll_no",
+        "name",
+        "subject1_marks",
+        "subject2_marks",
+        "subject3_marks",
+      ],
+      example: ["001", "John Doe", "30", "78", "100"],
     },
     fees: {
-      headers: ["StudentID", "Name", "FeesAmount", "FeesPaid", "FeesStatus"],
-      example: ["ST001", "John Doe", "5000", "3000", "Pending"],
+      headers: ["roll_no", "name", "total_fee", "fee_paid", "fee_status"],
+      example: ["001", "John Doe", "5000", "3000", "Due"],
     },
   };
 
@@ -125,14 +192,32 @@ const UploadSheets = () => {
         <CardDescription>Upload CSV or Excel file</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-          <Upload className="h-8 w-8 mx-auto mb-2 text-primary/60" />
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+            file
+              ? "bg-blue-400 border-blue-600"
+              : "border-primary/30 hover:border-primary/50"
+          }`}
+        >
+          <Upload
+            className={`h-8 w-8 mx-auto mb-2 ${
+              file ? "text-white" : "text-primary/60"
+            }`}
+          />
           <div className="space-y-2">
             <Label htmlFor={`${type}-upload`} className="cursor-pointer">
-              <div className="text-sm font-medium">
+              <div
+                className={`text-sm font-medium ${
+                  file ? "text-white" : "text-gray-800"
+                }`}
+              >
                 {file ? file.name : "Click to upload or drag and drop"}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div
+                className={`text-xs ${
+                  file ? "text-white/90" : "text-muted-foreground"
+                }`}
+              >
                 CSV, XLSX files (Max 10MB)
               </div>
             </Label>
@@ -181,6 +266,45 @@ const UploadSheets = () => {
               early intervention system
             </p>
           </div>
+
+          <div className="flex justify-center mb-10">
+            <div className="flex items-center space-x-4 bg-gray-100 p-4 rounded-xl shadow relative group">
+              {/* Label */}
+              <label
+                htmlFor="aiToggle"
+                className="text-gray-800 font-medium cursor-not-allowed flex items-center"
+              >
+                Like to integrate AI-ML?
+              </label>
+
+              {/* Toggle Button (Disabled) */}
+              <button
+                id="aiToggle"
+                disabled
+                className="relative w-14 h-8 bg-gray-300 rounded-full cursor-not-allowed flex items-center px-1 transition"
+              >
+                <span className="absolute left-1 w-6 h-6 bg-white rounded-full shadow"></span>
+              </button>
+
+              {/* Icon with Tooltip */}
+              <div className="relative">
+                <Lock className="text-gray-500 w-5 h-5 cursor-pointer" />
+
+                {/* Tooltip on hover */}
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-black text-white text-sm rounded-md px-3 py-2 w-64">
+                  If you want to integrate AI-ML model, please{" "}
+                  <a
+                    href="/login"
+                    className="underline text-blue-400 hover:text-blue-300"
+                  >
+                    login first
+                  </a>
+                  .
+                </div>
+              </div>
+            </div>
+          </div>
+          <SampleDataFiller handleFileUpload={handleFileUpload} />
 
           {/* File Upload Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">

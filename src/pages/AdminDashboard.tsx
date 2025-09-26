@@ -199,9 +199,9 @@ const AdminDashboard = () => {
                   {students.map((student: any) => {
                     // Map risk levels to colors
                     const riskColors: Record<string, string> = {
-                      High: "hsla(16, 64.1%, 75.8%, 1)", // Red-ish for high risk
-                      Medium: "hsla(48, 89%, 56%, 1)", // Yellow for medium risk
-                      Low: "hsla(135, 64%, 76%, 1)", // Green for low risk
+                      High: "hsla(16, 64.1%, 75.8%, 0.6)", // Red-ish for high risk
+                      Medium: "hsla(48, 89%, 56%, 0.6)", // Yellow for medium risk
+                      Low: "hsla(135, 64%, 76%, 0.6)", // Green for low risk
                     };
 
                     return (
