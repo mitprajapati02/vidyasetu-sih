@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ExcelJS from "exceljs";
 import {
   Table,
   TableBody,
@@ -22,6 +23,13 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 const AdminDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,7 +56,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // ✅ Extract from API response
   const { filters, mentor, students, summary } = data;
 
   const getRiskBadgeClass = (risk: string) => {
@@ -64,13 +71,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const StatCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    icon: Icon,
-    description,
-    bgColor,
-  }) => (
+  const StatCard: React.FC<{
+    title: string;
+    value: string | number;
+    icon: React.FC<React.SVGProps<SVGSVGElement>>;
+    description: string;
+    bgColor?: string;
+  }> = ({ title, value, icon: Icon, description, bgColor }) => (
     <Card
       className={`backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 ${
         bgColor || "bg-card/50"
@@ -89,14 +96,256 @@ const AdminDashboard = () => {
     </Card>
   );
 
-  const exportData = (format: "pdf" | "excel") => {
-    console.log(`Exporting data as ${format}`);
-    // Here you can hook into a real export service
+  const exportToExcel = async (students, summary, mentor) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Dashboard");
+
+    // Add summary headers and values
+    worksheet.addRow([
+      "Total Students",
+      "High Risk Students",
+      "Dropout %",
+      "Mentor Assigned",
+      "Overall Class Status",
+    ]);
+    worksheet.addRow([
+      summary.total_students,
+      summary.high_risk_students,
+      summary.dropout_percentage,
+      mentor.name,
+      summary.overall_status,
+    ]);
+
+    worksheet.addRow([]);
+
+    // Student headers
+    worksheet.addRow([
+      "Roll No",
+      "Name",
+      "Attendance",
+      "Marks",
+      "Fee Status",
+      "Risk Level",
+    ]);
+
+    // Add student rows
+    students.forEach((student) => {
+      worksheet.addRow([
+        student.roll_no,
+        student.name,
+        student.avg_attendance.toFixed(1) + "%",
+        student.avg_marks.toFixed(1) + "%",
+        student.fee_status,
+        student.risk_level,
+      ]);
+    });
+
+    // Color cells based on risk level
+    students.forEach((student, idx) => {
+      const row = worksheet.getRow(idx + 5); // Assuming first student row is 5
+      let fillColor = null;
+
+      switch (student.risk_level) {
+        case "High":
+          fillColor = "FFFFC7CE"; // light red
+          break;
+        case "Medium":
+          fillColor = "FFFFEB9C"; // light yellow
+          break;
+        case "Low":
+          fillColor = "FFC6EFCE"; // light green
+          break;
+      }
+
+      if (fillColor) {
+        // Color columns C, D, E, F (3,4,5,6 index in exceljs)
+        [3, 4, 5, 6].forEach((col) => {
+          const cell = row.getCell(col);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: fillColor },
+          };
+        });
+      }
+    });
+
+    // Save the file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, "dashboard.xlsx");
+  };
+
+  const exportToPDF = () => {
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 15;
+    let y = 20;
+
+    // 1. Header Section
+    pdf.setFontSize(22);
+    pdf.setTextColor("#F57152");
+    pdf.text("Admin Dashboard", pageWidth / 2, y, { align: "center" });
+    y += 10;
+
+    pdf.setFontSize(14);
+    pdf.setTextColor("#000");
+    pdf.text("Monitoring students for dropout risk", pageWidth / 2, y, {
+      align: "center",
+    });
+    y += 10;
+
+    pdf.setFontSize(12);
+    pdf.text(`Mentor: ${mentor.name} (${mentor.email})`, pageWidth / 2, y, {
+      align: "center",
+    });
+    y += 15;
+
+    // 2. Stats Cards Section
+    const cardWidth = (pageWidth - margin * 2 - 10) / 3;
+    const cardHeight = 35;
+    const cards = [
+      {
+        title: "Total Students",
+        value: summary.total_students.toString(),
+        description: "Enrolled students",
+        bgColor: "#BFDBFE",
+      },
+      {
+        title: "High Risk Students",
+        value: summary.high_risk_students.toString(),
+        description: "Need immediate attention",
+        bgColor: "#FCA5A5",
+      },
+      {
+        title: "Dropout %",
+        value: summary.dropout_percentage + "%",
+        description: "Based on current trends",
+        bgColor: "#FDE68A",
+      },
+      {
+        title: "Mentor Assigned",
+        value: mentor.name,
+        description: "Monitoring students",
+        bgColor: "#86EFAC",
+      },
+      {
+        title: "Overall Class Status",
+        value: summary.overall_status,
+        description: "Performance indicator",
+        bgColor: "#C4B5FD",
+      },
+    ];
+
+    let cardX = margin;
+    let cardY = y;
+    const cardsPerRow = 3;
+
+    cards.forEach((card, i) => {
+      pdf.setFillColor(card.bgColor);
+      pdf.rect(cardX, cardY, cardWidth, cardHeight, "F");
+
+      pdf.setFontSize(10);
+      pdf.setTextColor("#333");
+      pdf.text(card.title, cardX + 5, cardY + 8);
+
+      pdf.setFontSize(18);
+      pdf.setTextColor("#000");
+      pdf.text(card.value, cardX + 5, cardY + 22);
+
+      pdf.setFontSize(8);
+      pdf.setTextColor("#555");
+      pdf.text(card.description, cardX + 5, cardY + 30);
+
+      cardX += cardWidth + 5;
+      if ((i + 1) % cardsPerRow === 0) {
+        cardX = margin;
+        cardY += cardHeight + 10;
+      }
+    });
+
+    y = cardY + cardHeight + 15;
+
+    // 3. Table Section
+
+    const tableColumn = [
+      "Roll No",
+      "Name",
+      "Attendance",
+      "Marks",
+      "Fee Status",
+      "Risk Level",
+    ];
+    const tableRows = students.map((student) => [
+      student.roll_no,
+      student.name,
+      student.avg_attendance.toFixed(1) + "%",
+      student.avg_marks.toFixed(1) + "%",
+      student.fee_status,
+      student.risk_level,
+    ]);
+
+    autoTable(pdf, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: y,
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+        halign: "center",
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: "#2563EB",
+        textColor: "#fff",
+        fontStyle: "bold",
+      },
+      didParseCell: (data) => {
+        if (data.section === "body" && data.column.index === 5) {
+          const risk = data.cell.text[0];
+          let fillColor;
+          switch (risk) {
+            case "High":
+              fillColor = "#F87171"; // Red-400
+              break;
+            case "Medium":
+              fillColor = "#FBBF24"; // Yellow-400
+              break;
+            case "Low":
+              fillColor = "#34D399"; // Green-400
+              break;
+            default:
+              fillColor = null;
+          }
+          if (fillColor) {
+            data.cell.styles.fillColor = fillColor;
+            data.cell.styles.textColor = "#000";
+          }
+        }
+      },
+    });
+
+    // 4. Footer on each page
+    const pageCount = pdf.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      const footerText = `© ${new Date().getFullYear()} VidyaSetu. All rights reserved.`;
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(
+        footerText,
+        pageWidth / 2,
+        pdf.internal.pageSize.getHeight() - 10,
+        { align: "center" }
+      );
+    }
+
+    pdf.save("admin-dashboard.pdf");
   };
 
   return (
     <>
-      {" "}
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <div className="container mx-auto px-6 py-12">
@@ -115,19 +364,19 @@ const AdminDashboard = () => {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => exportData("pdf")}
-                className="border-primary/40 hover:bg-primary/10 hover:text-black"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => exportData("excel")}
+                onClick={() => exportToExcel(students, summary, mentor)}
                 className="border-primary/40 hover:bg-primary/10 hover:text-black"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Excel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={exportToPDF}
+                className="border-primary/40 hover:bg-primary/10 hover:text-black"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Export PDF
               </Button>
             </div>
           </div>
