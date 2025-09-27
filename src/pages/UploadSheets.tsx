@@ -124,10 +124,13 @@ const UploadSheets = () => {
     formData.append("mentor_email", mentorEmail);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/dropout", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://vidyasetu-backend-sih-production.up.railway.app/dropout",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
       console.log("Response:", data);
