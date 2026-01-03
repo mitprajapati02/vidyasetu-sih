@@ -1,73 +1,66 @@
-# Welcome to your Lovable project
+## Vidyasetu
 
-## Project info
+Vidyasetu is an AI-based student dropout prediction and counseling platform that consolidates scattered academic data—attendance, marks, and fee records—into a single, actionable dashboard. Using rule-based thresholds combined with AI/ML insights, it helps institutions identify at-risk students early and enables timely, data-driven interventions without replacing human judgment.
 
-**URL**: https://lovable.dev/projects/19a14b34-4fb0-42df-9342-8a324526a8c2
+## Project Status
+This project is currently in development.
+Core features such as data upload, rule-based risk classification, color-coded dashboards, mentor alerts, and report exports are implemented. Advanced AI/ML-based predictions using institution-specific historical success data and extended analytics are in progress.
 
-## How can I edit this code?
+## Project Screen Shot(s)  
 
-There are several ways of editing your application.
+<img width="1899" height="913" alt="brave_screenshot_localhost" src="https://github.com/user-attachments/assets/282b1731-33e4-4374-82e5-0d52b6760b6e" />
 
-**Use Lovable**
+<img width="1900" height="918" alt="brave_screenshot_localhost (1)" src="https://github.com/user-attachments/assets/f887ad9f-3038-4d21-9019-ccbbcc15ad03" />
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/19a14b34-4fb0-42df-9342-8a324526a8c2) and start prompting.
+<img width="1900" height="912" alt="brave_screenshot_localhost (2)" src="https://github.com/user-attachments/assets/e3758b5f-56c4-4053-9adc-5573045e3165" />
 
-Changes made via Lovable will be committed automatically to this repo.
+<img width="1919" height="929" alt="Screenshot 2026-01-03 090910" src="https://github.com/user-attachments/assets/b4f1a253-ce49-4c85-9f58-f4b73695dcb2" />
 
-**Use your preferred IDE**
+<img width="1899" height="924" alt="Screenshot 2026-01-03 090934" src="https://github.com/user-attachments/assets/33ef9376-dc98-4553-af5c-864b6b48bcb8" />
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Installation and Setup Instructions
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
 
-Follow these steps:
+Installation:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+`npm install`  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+To Start Development Server:  
 
-# Step 3: Install the necessary dependencies.
-npm i
+`npm run dev`  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+To Build for Production:
 
-**Edit a file directly in GitHub**
+`npm run build`  
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To Visit App:
 
-**Use GitHub Codespaces**
+`http://localhost:8080`  
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Context
 
-## What technologies are used for this project?
+  - This project was developed as an innovation-driven solution for a national-level problem statement (SIH), focusing on reducing student dropout rates through early detection and timely counseling.
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/19a14b34-4fb0-42df-9342-8a324526a8c2) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## What We Set Out to Build
+  
+  - We aimed to build a simple, affordable, and scalable system that:
+    Merges existing student data from multiple sources  
+    Identifies at-risk students early
+    Notifies mentors and parents in time
+    Empowers educators rather than replacing them
+    
+  ## Why This Project Was Challenging (and Valuable)
+  
+  - Handling scattered and inconsistent data formats from different institutions
+  - Designing a human-in-the-loop system where AI supports—not overrides—educators
+  - Ensuring the system remains transparent, configurable, and easy to use
+  - Balancing rule-based logic with AI/ML predictions for better accuracy
+  
+  ## Tools & Technologies Used
+  - Vite + React (TypeScript) – Fast development and scalable frontend architecture
+  - Tailwind CSS – Responsive, clean, and modern UI
+  - AI/ML (Planned & In Progress) – Learning from institution-specific success stories
+  - Rule-Based Logic – Transparent and configurable risk thresholds
+  - Excel/CSV Handling – Seamless migration from existing systems
+  - PDF & Excel Export – Institutional reporting and record-keeping    
